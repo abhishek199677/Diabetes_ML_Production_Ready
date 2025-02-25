@@ -142,7 +142,7 @@ def main():
     )
     # Display live demo link
     st.markdown(
-        "[Live Demo](https://diabetes-mlapplictionready.streamlit.app//)"
+        "[Live Demo](https://diabetes-mlapplictionready.streamlit.app)"
     )
 
     # Display custom footer
