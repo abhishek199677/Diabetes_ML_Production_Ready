@@ -4,6 +4,14 @@ import streamlit as st
 import streamlit.components.v1 as components
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
+
+uri = "mongodb+srv://username:password@cluster1.m445t.mongodb.net/?appName=Cluster1"
+
+client = MongoClient(uri, server_api=ServerApi('1'))
+db = client['diabetes']    #creating database
+collection = db['diabetes_data']   #creating collection inside database
 
 def load_model():
     """Loads the trained model and scaler from a pickle file."""
@@ -77,13 +85,24 @@ def main():
         DiabetesPedigreeFunction = float(st.text_input('Diabetes Pedigree Function value', ''))
         Age = float(st.text_input('Age of the Person', ''))
         
-        input_data = [Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, DiabetesPedigreeFunction, Age]
+        input_data = {
+            'Pregnancies': Pregnancies,
+            'Glucose': Glucose,
+            'BloodPressure': BloodPressure,
+            'SkinThickness': SkinThickness,
+            'Insulin': Insulin,
+            'BMI': BMI,
+            'DiabetesPedigreeFunction': DiabetesPedigreeFunction,
+            'Age': Age
+        }
         
         # Load model and scaler
         classifier, scaler = load_model()
         
         if st.button('Diabetes Test Result'):
-            diagnosis = diabetes_prediction(input_data, classifier, scaler)
+            diagnosis = diabetes_prediction(list(input_data.values()), classifier, scaler)
+            input_data['prediction'] = diagnosis
+            collection.insert_one(input_data)
             st.success(diagnosis)
     except ValueError:
         st.error("Please enter valid numerical values for all inputs.")
@@ -123,7 +142,7 @@ def main():
     )
     # Display live demo link
     st.markdown(
-        "[Live Demo](https://diabetes-scan-prediction.herokuapp.com/)"
+        "[Live Demo](https://diabetes-mlapplictionready.streamlit.app//)"
     )
 
     # Display custom footer
